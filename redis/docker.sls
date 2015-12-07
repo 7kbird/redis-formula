@@ -2,6 +2,7 @@
 
 {% for name, docker in salt['pillar.get']('redis:dockers', {}).items() %}
 {% set docker_image = docker.get('image', 'sameersbn/redis')%}
+{% set docker_image = docker_image ~ ':latest' if ':' not in docker_image %}
 {% do docker_images.append(docker_image) if docker_image not in docker_images %}
 
 redis-docker-running_{{ name }}:
@@ -22,4 +23,5 @@ redis-docker-image_{{ image }}:
   #  - name: {{ image }}
   cmd.run:
     - name: docker pull {{ image }}
+    - unless: '[ $(docker images -q {{ image }}) ]'
 {% endfor %}
